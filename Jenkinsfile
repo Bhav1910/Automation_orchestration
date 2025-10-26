@@ -1,15 +1,10 @@
 pipeline {
-    agent {
-        docker { 
-            image 'node:20'  // Node.js LTS image with npm included
-            args '-u root'   // optional, run container as root
-        }
-    }
+    agent any
 
     environment {
         DOCKER_HUB_REPO = 'bhavkorat/login-form'
-        DOCKER_HUB_USER = credentials('dockerhub-username')  // set in Jenkins
-        DOCKER_HUB_PASS = credentials('dockerhub-pass')      // set in Jenkins
+        DOCKER_HUB_USER = credentials('dockerhub-username')
+        DOCKER_HUB_PASS = credentials('dockerhub-pass')
     }
 
     stages {
@@ -21,7 +16,13 @@ pipeline {
             }
         }
 
-        stage('Build App') {
+        stage('Build React App') {
+            agent {
+                docker {
+                    image 'node:20'
+                    args '-u root'
+                }
+            }
             steps {
                 sh 'npm install'
                 sh 'npm run build'
@@ -34,7 +35,7 @@ pipeline {
             }
         }
 
-        stage('Push to Docker Hub') {
+        stage('Push Docker Image') {
             steps {
                 sh '''
                     echo $DOCKER_HUB_PASS | docker login -u $DOCKER_HUB_USER --password-stdin
@@ -45,8 +46,8 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f deployment.yaml'
-                sh 'kubectl apply -f service.yaml'
+                sh 'kubectl apply -f k8s/deployment.yaml'
+                sh 'kubectl apply -f k8s/service.yaml'
             }
         }
     }
