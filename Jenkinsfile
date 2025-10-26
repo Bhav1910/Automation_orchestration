@@ -7,18 +7,12 @@ pipeline {
         DOCKER_HUB_PASS = credentials('KoRat@123')      // Jenkins credential ID
     }
 
-    stages {
-        stage('Checkout Code') {
+    tages {
+        stage('Checkout Code Explicitly') {
             steps {
-                // Force clean checkout to avoid "not in a git directory" errors
-                checkout([$class: 'GitSCM', 
-                    branches: [[name: 'main']], 
-                    doGenerateSubmoduleConfigurations: false, 
-                    extensions: [[$class: 'CleanCheckout']], 
-                    userRemoteConfigs: [[
-                        url: 'https://github.com/Bhav1910/Automation_orchestration.git'
-                    ]]
-                ])
+                git branch: 'main', 
+                    credentialsId: 'bhavkorat', 
+                    url: 'https://github.com/Bhav1910/Automation_orchestration.git'
             }
         }
 
