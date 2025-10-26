@@ -8,7 +8,10 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/Bhav1910/Automation_orchestration.git'
+                git branch: 'main',
+                  url: 'https://github.com/Bhav1910/Automation_orchestration.git',
+                  credentialsId: 'github-credentials-id'
+
             }
         }
 
