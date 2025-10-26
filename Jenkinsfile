@@ -3,24 +3,30 @@ pipeline {
 
     environment {
         DOCKER_HUB_REPO = 'bhavkorat/login-form'
-        DOCKER_HUB_USER = credentials('dockerhub-username')
-        DOCKER_HUB_PASS = credentials('dockerhub-pass')
+        DOCKER_HUB_USER = credentials('bhavkorat')  // Jenkins credential ID
+        DOCKER_HUB_PASS = credentials('KoRat@123')      // Jenkins credential ID
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/Bhav1910/Automation_orchestration.git',
-                    credentialsId: 'github-credentials-id'
+                // Force clean checkout to avoid "not in a git directory" errors
+                checkout([$class: 'GitSCM', 
+                    branches: [[name: 'main']], 
+                    doGenerateSubmoduleConfigurations: false, 
+                    extensions: [[$class: 'CleanCheckout']], 
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/Bhav1910/Automation_orchestration.git'
+                    ]]
+                ])
             }
         }
 
         stage('Build React App') {
             agent {
                 docker {
-                    image 'node:20'
-                    args '-u root'
+                    image 'node:20'   // Node.js image with npm
+                    args '-u root'    // run as root inside container
                 }
             }
             steps {
@@ -46,6 +52,7 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
+                // Apply deployment & service from k8s folder
                 sh 'kubectl apply -f k8s/deployment.yaml'
                 sh 'kubectl apply -f k8s/service.yaml'
             }
