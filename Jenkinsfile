@@ -7,7 +7,7 @@ pipeline {
         DOCKER_HUB_PASS = credentials('KoRat@123')      // Jenkins credential ID
     }
 
-    tages {
+    tags {
         stage('Checkout Code Explicitly') {
             steps {
                 git branch: 'main', 
